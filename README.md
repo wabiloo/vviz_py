@@ -13,7 +13,7 @@ The current version shows:
 
 ![screenshot](https://raw.githubusercontent.com/wabiloo/vviz_py/master/docs/screenshot.png)
 
-[Interactive version](https://raw.githubusercontent.com/wabiloo/vviz_py/master/docs/example1.html)
+[Interactive version](http://htmlpreview.github.io/?https://github.com/wabiloo/vviz_py/master/docs/example1.html)
 
 ## Requirements
 - ffprobe (part of most [ffmpeg](https://www.ffmpeg.org/download.html) packages)
