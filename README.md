@@ -13,6 +13,8 @@ The current version shows:
 
 ![screenshot](https://raw.githubusercontent.com/wabiloo/vviz_py/master/docs/screenshot.png)
 
+[Interactive version](https://raw.githubusercontent.com/wabiloo/vviz_py/master/docs/example1.html)
+
 ## Requirements
 - ffprobe (part of most [ffmpeg](https://www.ffmpeg.org/download.html) packages)
 - [mp4dump](https://www.bento4.com/documentation/mp4dump/)
