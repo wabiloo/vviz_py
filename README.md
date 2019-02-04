@@ -11,7 +11,7 @@ The current version shows:
 
 ## Example
 
-!(https://raw.githubusercontent.com/wabiloo/vviz_py/blob/master/docs/screenshot.png)
+!(https://raw.githubusercontent.com/wabiloo/vviz_py/raw/master/docs/screenshot.png)
 
 ## Requirements
 - ffprobe (part of most [ffmpeg](https://www.ffmpeg.org/download.html) packages)
