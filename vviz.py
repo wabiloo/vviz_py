@@ -22,7 +22,7 @@ def test_pandas(frames):
 def sec2ts(sec):
     return datetime.fromtimestamp(sec, tz=pytz.UTC)
 
-def get_data_from_track(track, start_time=None, end_time=None):
+def get_fragment_data_from_track(track, start_time=None, end_time=None):
     data = []
 
     fragments = track.fragments
@@ -36,7 +36,7 @@ def get_data_from_track(track, start_time=None, end_time=None):
     frag_bar = go.Bar(
         x=[f.start_time for f in fragments],
         y=[f.size for f in fragments],
-        text=[f.size for f in fragments],
+        text=[str(f.duration.total_seconds()) + "s" for f in fragments],
         width=[f.duration.total_seconds()*1000 for f in fragments],
         offset=0,
         name="Fragment",
@@ -48,14 +48,13 @@ def get_data_from_track(track, start_time=None, end_time=None):
             )
         ),
         yaxis='y2',
-        textposition='none',
+        textposition='inside',
         hoverinfo="text",
         hovertext=[f.to_label() for f in fragments]
     )
     data.append(frag_bar)
 
     return data
-
 
 def get_frame_data_from_stream(stream):
     # turn frames into a pandas DataFrame indexed on start time
@@ -132,35 +131,45 @@ def get_frame_data_from_stream(stream):
     return data
 
 def get_gop_data_from_stream(stream):
-
     data = []
+    gops = stream.gops
 
-    # Bars for GOPs
-    gop_bar = go.Bar(
-        x=[gop.start_time for gop in stream.gops],
-        y=[gop.size for gop in stream.gops],
-        text=[gop.length for gop in stream.gops],
-        width=[gop.duration.total_seconds()*1000 for gop in stream.gops],
-        offset=0,
-        name="GOP",
-        marker=dict(
-            color=["rgba(255,0,0,0.2)" if g.closed else 'rgba(255,187,0,0.2)' for g in stream.gops],
-            line=dict(
-                width=1,
-                color="#111111"
-            )
-        ),
-        yaxis='y2',
-        textposition='auto',
-        hoverinfo="text",
-        hovertext=[gop.to_label() for gop in stream.gops]
-    )
-    data.append(gop_bar)
+    bars = [
+        dict(closed=True, color='rgb(235, 188, 188)', label='Closed GOP'),
+        dict(closed=False, color='rgb(234, 220, 190)', label='Open GOP'),
+    ]
+
+    for bar in bars:
+        # Bars for GOPs
+        goplist = list(filter(lambda g: g.closed == bar['closed'], gops))
+        gop_bar = go.Bar(
+            x=[gop.start_time for gop in goplist],
+            y=[gop.size for gop in goplist],
+            text=[gop.length for gop in goplist],
+            width=[gop.duration.total_seconds()*1000 for gop in goplist],
+            offset=0,
+            name=bar['label'],
+            marker=dict(
+                color=bar['color'],
+                line=dict(
+                    width=1,
+                    color="#111111"
+                )
+            ),
+            yaxis='y2',
+            textposition='auto',
+            hoverinfo="text",
+            hovertext=[gop.to_label() for gop in stream.gops],
+            legendgroup='gops'
+        )
+        data.append(gop_bar)
 
     return data
 
 
-def plot_data(data, filename, stream_label, track_label):
+def plot_data(data, file, stream_label, track_label):
+    filename = os.path.basename(args.path_to_file)
+
     layout = go.Layout(
         title="Frame, GOP and Fragments<br>" + filename,
         xaxis=dict(
@@ -266,7 +275,7 @@ def plot_data(data, filename, stream_label, track_label):
     plotly.offline.plot({
         "data": data,
         "layout": layout
-    }, auto_open=True, filename=filename)
+    }, auto_open=True, filename="{}.html".format(file))
 
 
 if __name__ == "__main__":
@@ -310,11 +319,11 @@ if __name__ == "__main__":
     data += get_frame_data_from_stream(stream)
     # filtering necessary as mp4dump does not offer command line parameters for it
     if (interval):
-        data += get_data_from_track(track,
-                                    start_time=stream.frames[0].start_time,
-                                    end_time=stream.frames[-1].end_time)
+        data += get_fragment_data_from_track(track,
+                                             start_time=stream.frames[0].start_time,
+                                             end_time=stream.frames[-1].end_time)
     else:
-        data += get_data_from_track(track)
+        data += get_fragment_data_from_track(track)
     data += get_gop_data_from_stream(stream)
 
-    plot_data(data, filename, stream_label=stream.to_label(), track_label=track.to_label())
+    plot_data(data, args.path_to_file, stream_label=stream.to_label(), track_label=track.to_label())
