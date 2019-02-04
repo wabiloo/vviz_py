@@ -57,9 +57,6 @@ def get_fragment_data_from_track(track, start_time=None, end_time=None):
     return data
 
 def get_frame_data_from_stream(stream):
-    # turn frames into a pandas DataFrame indexed on start time
-    df = pd.DataFrame.from_records([f.to_dict() for f in stream.frames], index='start_time')
-
     bars = [
         dict(type=IFrame, color='#FFBB00', label='I-frame'),
         dict(type=IDRFrame, color='#FF0000', label='IDR frame'),
@@ -88,29 +85,15 @@ def get_frame_data_from_stream(stream):
 
         data.append(d)
 
+    return data
+
+def get_bitrate_data_from_stream(stream):
+    # turn frames into a pandas DataFrame indexed on start time
+    df = pd.DataFrame.from_records([f.to_dict() for f in stream.frames], index='start_time')
+
+    data = []
+
     # Bitrate
-    means_rolling = df['bitrate'] \
-        .rolling(window=int(stream.frame_rate),
-                 # win_type='triang',
-                 # center=True
-                 ) \
-        .mean()
-
-    bitrate_rolling = go.Scatter(
-        x=means_rolling.index,
-        y=means_rolling.values,
-        name="bitrate <br>(MGB2 - sliding 1s)",
-        yaxis='y3',
-        mode="lines",
-        line=dict(
-            width=1
-        ),
-        hoverinfo="x+y",
-        # stackgroup='bitrates'
-        # legendgroup="bitrates",
-    )
-    data.append(bitrate_rolling)
-
     means_expanding = df['bitrate'] \
         .expanding() \
         .mean()
@@ -121,12 +104,43 @@ def get_frame_data_from_stream(stream):
         name="bitrate <br>(cumul mean)",
         yaxis='y3',
         mode="lines",
+        line=dict(
+            width=1,
+            color="#7842AB"
+        ),
         hoverinfo="x+y",
         # stackgroup='bitrates',
-        fill="tonexty"
         # legendgroup = "bitrates"
     )
     data.append(bitrate_expanding)
+
+
+    means_rolling = df['bitrate'] \
+        .rolling(window=int(stream.frame_rate),
+                 win_type='triang',
+                 center=True
+                 ) \
+        .mean()
+
+    bitrate_rolling = go.Scatter(
+        x=means_rolling.index,
+        y=means_rolling.values,
+        name="bitrate <br>(MGB2 - 1s triang)",
+        yaxis='y3',
+        mode="lines",
+        line=dict(
+            width=1,
+            color="#9467BD"
+        ),
+        hoverinfo="x+y",
+        fill="tonexty",
+        fillcolor="rgba(225,213,246,0.4)"
+        # stackgroup='bitrates'
+        # legendgroup="bitrates",
+    )
+    data.append(bitrate_rolling)
+
+
 
     return data
 
@@ -317,6 +331,7 @@ if __name__ == "__main__":
 
     data = []
     data += get_frame_data_from_stream(stream)
+    data += get_bitrate_data_from_stream(stream)
     # filtering necessary as mp4dump does not offer command line parameters for it
     if (interval):
         data += get_fragment_data_from_track(track,
