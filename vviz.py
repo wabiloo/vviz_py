@@ -114,7 +114,8 @@ def get_bitrate_data_from_stream(stream):
     )
     data.append(bitrate_expanding)
 
-
+    # TODO - doesn't seem that using center=False provides the correct results.
+    # Peaks not aligned with i-frames as I assume it should
     means_rolling = df['bitrate'] \
         .rolling(window=int(stream.frame_rate),
                  win_type='triang',
@@ -311,8 +312,8 @@ if __name__ == "__main__":
                         help='streams to read from video file (see ffprobe -select_streams parameter)',
                         default='v:0')
     parser.add_argument('-t', '--title', dest='title',
-                        help='Frame, GOP and Fragments Analysis (vviz.py)',
-                        default='v:0')
+                        help='title for the chart (in addition to filename)',
+                        default='Frame, GOP and Fragments Analysis (vviz.py)')
     args = parser.parse_args()
 
     filename = os.path.basename(args.path_to_file)
