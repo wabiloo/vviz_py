@@ -188,6 +188,9 @@ def plot_data(data, file, title, stream_label, track_label):
 
     layout = go.Layout(
         title="{}<br>{}".format(title, filename),
+        autosize=True,
+        # width=1500,
+        # height=800,
         xaxis=dict(
             title='',
             tickmode='auto',
@@ -302,6 +305,19 @@ def plot_data(data, file, title, stream_label, track_label):
                 bordercolor="#d2cdcd",
                 borderwidth=1,
                 align="left"
+            ),
+            dict(
+                x=1,
+                xshift=200,
+                y=0,
+                yshift=-50,
+                xref='paper',
+                yref='paper',
+                xanchor='right',
+                yanchor='bottom',
+                showarrow=False,
+                text="generated " + datetime.now().strftime("%d-%b-%y %X") + " - github.com/wabiloo/vviz_py",
+                align="right"
             )
         ],
     )
@@ -309,7 +325,10 @@ def plot_data(data, file, title, stream_label, track_label):
     plotly.offline.plot({
         "data": data,
         "layout": layout
-    }, auto_open=True, filename="{}.html".format(file))
+    },
+        auto_open=True,
+        filename="{}.html".format(file)
+    )
 
 
 if __name__ == "__main__":
