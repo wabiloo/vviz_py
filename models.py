@@ -129,7 +129,7 @@ class Stream(object):
     def to_label(self):
         avg_bitrate = statistics.mean([f.bitrate for f in self.frames])
 
-        span = "<i>Analysis for span <br>{} to {}</i>".format(
+        span = "<i>analysis for timespan <br>{} to {}</i>".format(
             time_to_str(self.frames[0].start_time, self.duration),
             time_to_str(self.frames[-1].end_time, self.duration)
         )
@@ -138,7 +138,7 @@ class Stream(object):
             avg=sizeof_fmt(avg_bitrate, 'bps'),
         )
 
-        label = "Stream<br>{w}x{h}<br>duration: <b>{duration}</b><br><br>{span}<br>{analysis}".format(
+        label = "resolution: <b>{w}x{h}</b><br>duration: <b>{duration}</b><br><br>{span}<br>{analysis}".format(
             duration=str(self.duration)[:-3],
             analysis=analysis,
             span=span,
