@@ -208,12 +208,13 @@ def plot_data(data, file, title, stream_label, track_label):
             domain=[0.30, 1],
             title='frame size (b)',
             titlefont=dict(
-                size=16,
-                color='rgb(107, 107, 107)'
-            ),
-            tickfont=dict(
                 size=14,
                 color='rgb(107, 107, 107)'
+            ),
+            showticklabels=True,
+            ticks='outside',
+            tickfont=dict(
+                size=10,
             ),
             fixedrange=True,
             hoverformat='.3s'
@@ -221,8 +222,15 @@ def plot_data(data, file, title, stream_label, track_label):
         yaxis2=dict(
             domain=[0, 0.25],
             title='size (b)',
+            titlefont=dict(
+                size=14
+            ),
             side='left',
             showticklabels=True,
+            ticks='outside',
+            tickfont=dict(
+                size=10,
+            ),
             showgrid=False,
             anchor='x',
             spikesnap="data",
@@ -234,9 +242,17 @@ def plot_data(data, file, title, stream_label, track_label):
         yaxis3=dict(
             domain=[0.30, 1],
             title='bitrate (bps)',
+            titlefont=dict(
+                color="#CDA8F0",
+                size=14
+            ),
             side='right',
             showticklabels=True,
             ticks='outside',
+            tickfont=dict(
+                size=10,
+                color="#CDA8F0"
+            ),
             showgrid=False,
             anchor='x',
             overlaying='y',
