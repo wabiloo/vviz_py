@@ -87,7 +87,7 @@ def get_frame_data_from_stream(stream):
 
     return data
 
-def get_bitrate_data_from_stream(stream):
+def get_bitrate_data_from_stream(stream, window):
     # turn frames into a pandas DataFrame indexed on start time
     df = pd.DataFrame.from_records([f.to_dict() for f in stream.frames], index='start_time')
 
@@ -117,16 +117,17 @@ def get_bitrate_data_from_stream(stream):
     # TODO - doesn't seem that using center=False provides the correct results.
     # Peaks not aligned with i-frames as I assume it should
     means_rolling = df['bitrate'] \
-        .rolling(window=int(stream.frame_rate),
+        .rolling(window=int(stream.frame_rate * window),
                  win_type='triang',
-                 center=True
+                 center=True,
+                 min_periods=0
                  ) \
         .mean()
 
     bitrate_rolling = go.Scatter(
         x=means_rolling.index,
         y=means_rolling.values,
-        name="bitrate <br>(MGB2 - 1s triang)",
+        name="bitrate <br>(sliding - {}s)".format(window),
         yaxis='y3',
         mode="lines",
         line=dict(
@@ -314,6 +315,9 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--title', dest='title',
                         help='title for the chart (in addition to filename)',
                         default='Frame, GOP and Fragments Analysis (vviz.py)')
+    parser.add_argument('-b', '--window', dest='window', type=float,
+                        help='size of the window (in seconds) used to calculate average bitrates',
+                        default='1')
     args = parser.parse_args()
 
     filename = os.path.basename(args.path_to_file)
@@ -337,7 +341,7 @@ if __name__ == "__main__":
 
     data = []
     data += get_frame_data_from_stream(stream)
-    data += get_bitrate_data_from_stream(stream)
+    data += get_bitrate_data_from_stream(stream, args.window)
     # filtering necessary as mp4dump does not offer command line parameters for it
     if (interval):
         data += get_fragment_data_from_track(track,
