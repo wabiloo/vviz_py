@@ -349,7 +349,7 @@ if __name__ == "__main__":
                         default='v:0')
     parser.add_argument('-t', '--title', dest='title',
                         help='title for the chart (in addition to filename)',
-                        default='Frame, GOP and Fragments Analysis (vviz.py)')
+                        default='Frame, GOP and Fragment Analysis')
     parser.add_argument('-b', '--window', dest='window', type=float,
                         help='size of the window (in seconds) used to calculate average bitrates',
                         default='1')
