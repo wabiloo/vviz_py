@@ -374,13 +374,18 @@ class MP4Track(object):
             raise Exception("Argument 'origin' should be of type MP4DumpResponse")
 
     def to_label(self):
-        max_size = max([f.size for f in self.fragments])
-        avg_size = statistics.mean([f.size for f in self.fragments])
+        label = ""
+        if len(self.fragments):
+            max_size = max([f.size for f in self.fragments])
+            avg_size = statistics.mean([f.size for f in self.fragments])
 
-        label = "avg fragment size: <b>{avg}</b><br>max segment size: <b>{max}</b>".format(
-            avg=sizeof_fmt(avg_size, "b"),
-            max=sizeof_fmt(max_size, "b"),
-        )
+            label = "fragment size: <br>avg: <b>{avg}</b><br>max: <b>{max}</b>".format(
+                avg=sizeof_fmt(avg_size, "b"),
+                max=sizeof_fmt(max_size, "b"),
+            )
+
+        else:
+            label = "non-fragmented file"
 
         return label
 

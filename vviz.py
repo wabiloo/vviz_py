@@ -73,14 +73,14 @@ def get_frame_data_from_stream(stream):
         d = go.Bar(
             x=[f.start_time for f in frames],
             y=[f.size for f in frames],
-            text=[str(f) for f in frames],
+            text=["frame {}".format(f.position) for f in frames],
             width=[f.duration.total_seconds()*1000 for f in frames],
             offset=[0 for f in frames],
             name=b['label'],
             marker=dict(
                 color=b['color']
             ),
-            hoverinfo="x+y+name",
+            hoverinfo="x+y+text+name"
         )
 
         data.append(d)
@@ -105,7 +105,7 @@ def get_bitrate_data_from_stream(stream):
         yaxis='y3',
         mode="lines",
         line=dict(
-            width=1,
+            width=2,
             color="#7842AB"
         ),
         hoverinfo="x+y",
@@ -181,11 +181,11 @@ def get_gop_data_from_stream(stream):
     return data
 
 
-def plot_data(data, file, stream_label, track_label):
+def plot_data(data, file, title, stream_label, track_label):
     filename = os.path.basename(args.path_to_file)
 
     layout = go.Layout(
-        title="Frame, GOP and Fragments<br>" + filename,
+        title="{}<br>{}".format(title, filename),
         xaxis=dict(
             title='',
             tickmode='auto',
@@ -213,7 +213,8 @@ def plot_data(data, file, stream_label, track_label):
                 size=14,
                 color='rgb(107, 107, 107)'
             ),
-            fixedrange=True
+            fixedrange=True,
+            hoverformat='.3s'
         ),
         yaxis2=dict(
             domain=[0, 0.25],
@@ -242,7 +243,8 @@ def plot_data(data, file, stream_label, track_label):
             spikemode="toaxis+across+marker",
             spikethickness=1,
             spikedash='dot',
-            fixedrange=False
+            fixedrange=False,
+            hoverformat='.3s'
         ),
         legend=dict(
             x=1.06,
@@ -308,6 +310,9 @@ if __name__ == "__main__":
     parser.add_argument('--streams', dest='streams',
                         help='streams to read from video file (see ffprobe -select_streams parameter)',
                         default='v:0')
+    parser.add_argument('-t', '--title', dest='title',
+                        help='Frame, GOP and Fragments Analysis (vviz.py)',
+                        default='v:0')
     args = parser.parse_args()
 
     filename = os.path.basename(args.path_to_file)
@@ -341,4 +346,4 @@ if __name__ == "__main__":
         data += get_fragment_data_from_track(track)
     data += get_gop_data_from_stream(stream)
 
-    plot_data(data, args.path_to_file, stream_label=stream.to_label(), track_label=track.to_label())
+    plot_data(data, args.path_to_file, title=args.title, stream_label=stream.to_label(), track_label=track.to_label())
