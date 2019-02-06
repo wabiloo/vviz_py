@@ -9,6 +9,7 @@ from models import *
 
 import plotly
 import plotly.graph_objs as go
+import plotly.io as pio
 import pandas as pd
 import scipy
 import pytz
@@ -183,8 +184,8 @@ def get_gop_data_from_stream(stream):
     return data
 
 
-def plot_data(data, file, title, stream_label, track_label):
-    filename = os.path.basename(args.path_to_file)
+def plot_data(data, file, title, stream_label, track_label, resolution, formats):
+    filename = os.path.basename(file)
 
     layout = go.Layout(
         title="{}<br>{}".format(title, filename),
@@ -322,19 +323,34 @@ def plot_data(data, file, title, stream_label, track_label):
         ],
     )
 
-    plotly.offline.plot({
-        "data": data,
-        "layout": layout
-    },
-        auto_open=True,
-        filename="{}.html".format(file)
-    )
+    if 'interactive' in formats:
+        print("Generating interactive HTML output to {}.html".format(args.path_to_file))
+        plotly.offline.plot({
+            "data": data,
+            "layout": layout
+        },
+            auto_open=True,
+            filename="{}.html".format(file),
+            image_width=1000, image_height=600, image='svg'
+        )
+
+    for format in formats:
+        if format != 'interactive':
+            print ("Generating {} output to {}.{}".format(format, args.path_to_file, format) )
+            pio.write_image({
+                "data": data,
+                "layout": layout
+            },
+                file=file + '.' + format,
+                width=resolution[0],
+                height=resolution[1]
+            )
 
 
 if __name__ == "__main__":
     print(os.environ['PATH'])
 
-    parser = argparse.ArgumentParser(description='Dump GOP structure of video file')
+    parser = argparse.ArgumentParser(description='Chart generator (interactive and static) for video file analysis (frames, streams, fragments, gops, etc.)')
     parser.add_argument('path_to_file', help='video file to parse')
     parser.add_argument('--ffprobe-exec', dest='ffprobe_exec',
                         help='ffprobe executable. (default: %(default)s)',
@@ -352,7 +368,14 @@ if __name__ == "__main__":
                         default='Frame, GOP and Fragment Analysis')
     parser.add_argument('-b', '--window', dest='window', type=float,
                         help='size of the window (in seconds) used to calculate average bitrates',
-                        default='1')
+                        default=1.0)
+    parser.add_argument('-f', '--formats', dest='formats', nargs="*", choices=['interactive', 'svg', 'pdf', 'png', 'webp'],
+                        help='1 or multiple output formats',
+                        default=['interactive'])
+    parser.add_argument('-r', '--resolution', dest='resolution', nargs=2, type=int,
+                        help='resolution (width and height) for output images',
+                        default=[1200, 600])
+
     args = parser.parse_args()
 
     filename = os.path.basename(args.path_to_file)
@@ -386,4 +409,10 @@ if __name__ == "__main__":
         data += get_fragment_data_from_track(track)
     data += get_gop_data_from_stream(stream)
 
-    plot_data(data, args.path_to_file, title=args.title, stream_label=stream.to_label(), track_label=track.to_label())
+    plot_data(data,
+              args.path_to_file,
+              title=args.title,
+              stream_label=stream.to_label(),
+              track_label=track.to_label(),
+              resolution=args.resolution,
+              formats=args.formats)

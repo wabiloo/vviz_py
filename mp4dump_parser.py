@@ -7,7 +7,9 @@ class MP4DumpCommand(object):
     def __init__(self, executable='mp4dump', filename=None):
         self._command = '"{mp4dump}" --format json {filename}'.format(mp4dump=executable, filename=filename)
 
+        print("Executing mp4dump to extract track and fragment information")
         print(self._command)
+        print()
 
     def call(self):
         response = subprocess.check_output(self._command, shell=True, stderr=None)

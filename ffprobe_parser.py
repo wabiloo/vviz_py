@@ -9,13 +9,15 @@ class FFProbeCommand(object):
 
         # TODO - pass parameters to restrict the ffprobe dimensions returned
         self._command = \
-            '"{ffexec}" -select_streams {streams} {intervals} -show_frames -show_streams -print_format json {filename}' \
+            '"{ffexec}" -hide_banner -loglevel warning -select_streams {streams} {intervals} -show_frames -show_streams -print_format json {filename}' \
             .format(ffexec=executable,
                     filename=filename,
                     intervals=interval_param,
                     streams=streams)
 
+        print("Executing ffprobe to extract stream and frame information")
         print(self._command)
+        print()
 
     def call(self):
         response = subprocess.check_output(self._command, shell=True, stderr=None)
